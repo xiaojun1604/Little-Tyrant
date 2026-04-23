@@ -11,6 +11,7 @@ jobs:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
@@ -27,7 +28,20 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx libegl1-mesa libdbus-1-3
+        sudo apt-get install -y \
+          libgl1-mesa-glx \
+          libegl1-mesa \
+          libdbus-1-3 \
+          libxkbcommon-x11-0 \
+          libxcb-icccm4 \
+          libxcb-image0 \
+          libxcb-keysyms1 \
+          libxcb-randr0 \
+          libxcb-render-util0 \
+          libxcb-xinerama0 \
+          libxcb-xinput0 \
+          libxcb-xfixes0 \
+          libxcb-shape0
 
     - name: Install dependencies
       run: |
@@ -60,21 +74,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
     steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
         path: artifacts
 
-    - name: List artifacts (Debug)
-      run: ls -R artifacts
-
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        files: |
-          artifacts/binary-windows-latest/LittleTyrantInstaller_Win.exe
-          artifacts/binary-macos-latest/LittleTyrantInstaller_Mac
-          artifacts/binary-ubuntu-latest/LittleTyrantInstaller_Linux
+        files: artifacts/**/LittleTyrantInstaller_*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
