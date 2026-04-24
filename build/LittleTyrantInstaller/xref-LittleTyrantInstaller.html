@@ -289,6 +289,8 @@ imported by:
     <a href="#PyQt5.QtGui">PyQt5.QtGui</a>
  &#8226;   <a href="#PyQt5.QtWidgets">PyQt5.QtWidgets</a>
  &#8226;   <a href="#core.worker_thread">core.worker_thread</a>
+ &#8226;   <a href="#ui.tabs.android_pages.explorer_page">ui.tabs.android_pages.explorer_page</a>
+ &#8226;   <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
 
   </div>
 
@@ -305,6 +307,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#PyQt5.QtWidgets">PyQt5.QtWidgets</a>
+ &#8226;   <a href="#ui.tabs.android_pages.explorer_page">ui.tabs.android_pages.explorer_page</a>
 
   </div>
 
@@ -323,6 +326,8 @@ imports:
 imported by:
     <a href="#main.py">main.py</a>
  &#8226;   <a href="#ui.main_window">ui.main_window</a>
+ &#8226;   <a href="#ui.tabs.android_pages.explorer_page">ui.tabs.android_pages.explorer_page</a>
+ &#8226;   <a href="#ui.tabs.android_pages.install_page">ui.tabs.android_pages.install_page</a>
  &#8226;   <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
 
   </div>
@@ -1776,7 +1781,9 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
+    <a href="#ui.tabs.android_pages.explorer_page">ui.tabs.android_pages.explorer_page</a>
+ &#8226;   <a href="#ui.tabs.android_pages.install_page">ui.tabs.android_pages.install_page</a>
+ &#8226;   <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
 
   </div>
 
@@ -1795,7 +1802,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
+    <a href="#ui.tabs.android_pages.install_page">ui.tabs.android_pages.install_page</a>
 
   </div>
 
@@ -6272,7 +6279,8 @@ imported by:
  &#8226;   <a href="#tarfile">tarfile</a>
  &#8226;   <a href="#tempfile">tempfile</a>
  &#8226;   <a href="#threading">threading</a>
- &#8226;   <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
+ &#8226;   <a href="#ui.tabs.android_pages.explorer_page">ui.tabs.android_pages.explorer_page</a>
+ &#8226;   <a href="#ui.tabs.android_pages.install_page">ui.tabs.android_pages.install_page</a>
  &#8226;   <a href="#zipfile">zipfile</a>
  &#8226;   <a href="#zipfile._path.glob">zipfile._path.glob</a>
 
@@ -7527,6 +7535,65 @@ imports:
   </div>
   <div class="import">
 imported by:
+    <a href="#ui.tabs.android_pages">ui.tabs.android_pages</a>
+ &#8226;   <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="ui.tabs.android_pages"></a>
+  <a target="code" href="///E:/AI/Little-Tyrant/ui/tabs/android_pages/__init__.py" type="text/plain"><tt>ui.tabs.android_pages</tt></a>
+<span class="moduletype">Package</span>  <div class="import">
+imports:
+    <a href="#ui.tabs">ui.tabs</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.tabs.android_pages.explorer_page">ui.tabs.android_pages.explorer_page</a>
+ &#8226;   <a href="#ui.tabs.android_pages.install_page">ui.tabs.android_pages.install_page</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="ui.tabs.android_pages.explorer_page"></a>
+  <a target="code" href="///E:/AI/Little-Tyrant/ui/tabs/android_pages/explorer_page.py" type="text/plain"><tt>ui.tabs.android_pages.explorer_page</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#PyQt5.QtCore">PyQt5.QtCore</a>
+ &#8226;   <a href="#PyQt5.QtGui">PyQt5.QtGui</a>
+ &#8226;   <a href="#PyQt5.QtWidgets">PyQt5.QtWidgets</a>
+ &#8226;   <a href="#core.adb_manager">core.adb_manager</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#ui.tabs.android_pages">ui.tabs.android_pages</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="ui.tabs.android_pages.install_page"></a>
+  <a target="code" href="///E:/AI/Little-Tyrant/ui/tabs/android_pages/install_page.py" type="text/plain"><tt>ui.tabs.android_pages.install_page</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#PyQt5.QtWidgets">PyQt5.QtWidgets</a>
+ &#8226;   <a href="#core.adb_manager">core.adb_manager</a>
+ &#8226;   <a href="#core.worker_thread">core.worker_thread</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#ui.tabs.android_pages">ui.tabs.android_pages</a>
+
+  </div>
+  <div class="import">
+imported by:
     <a href="#ui.tabs.android_tab">ui.tabs.android_tab</a>
 
   </div>
@@ -7538,11 +7605,12 @@ imported by:
   <a target="code" href="///E:/AI/Little-Tyrant/ui/tabs/android_tab.py" type="text/plain"><tt>ui.tabs.android_tab</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#PyQt5.QtWidgets">PyQt5.QtWidgets</a>
+    <a href="#PyQt5.QtCore">PyQt5.QtCore</a>
+ &#8226;   <a href="#PyQt5.QtWidgets">PyQt5.QtWidgets</a>
  &#8226;   <a href="#core.adb_manager">core.adb_manager</a>
- &#8226;   <a href="#core.worker_thread">core.worker_thread</a>
- &#8226;   <a href="#os">os</a>
  &#8226;   <a href="#ui.tabs">ui.tabs</a>
+ &#8226;   <a href="#ui.tabs.android_pages.explorer_page">ui.tabs.android_pages.explorer_page</a>
+ &#8226;   <a href="#ui.tabs.android_pages.install_page">ui.tabs.android_pages.install_page</a>
 
   </div>
   <div class="import">
