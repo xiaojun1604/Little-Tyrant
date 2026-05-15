@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel
 from ui.tabs.android_tab import AndroidTab
 from ui.tabs.vpn_tab import VpnTab
+from core.version import get_display_title
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Little Tyrant - APK Installer")
+        self.setWindowTitle(get_display_title())
         self.resize(800, 600)
         
         # Main widget and layout

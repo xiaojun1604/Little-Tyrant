@@ -1,5 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.getcwd()))
+from core.version import VERSION
 
 a = Analysis(
     ['main.py'],
@@ -22,7 +25,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='LittleTyrantInstaller',
+    name=f'LittleTyrantInstaller-v{VERSION}',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
