@@ -1,4 +1,5 @@
 import os
+import tempfile
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QLineEdit, QListWidget, 
                              QTextEdit, QLabel, QSplitter, 
@@ -53,10 +54,13 @@ class ExplorerPage(QWidget):
         nav_layout = QHBoxLayout()
         self.back_btn = QPushButton("返回上级")
         self.back_btn.clicked.connect(self.navigate_up)
-        self.copy_btn = QPushButton("复制到本地 (Ctrl+C)")
+        self.copy_btn = QPushButton("导出到本地 (Ctrl+C)")
         self.copy_btn.clicked.connect(self.copy_to_local)
+        self.upload_btn = QPushButton("上传与替换")
+        self.upload_btn.clicked.connect(self.upload_to_remote)
         nav_layout.addWidget(self.back_btn)
         nav_layout.addWidget(self.copy_btn)
+        nav_layout.addWidget(self.upload_btn)
         file_layout.addLayout(nav_layout)
         
         self.file_list = QListWidget()
@@ -76,6 +80,11 @@ class ExplorerPage(QWidget):
         self.preview_text.setReadOnly(True)
         self.preview_text.setStyleSheet("background-color: #fafafa; font-family: 'Consolas', monospace;")
         preview_layout.addWidget(self.preview_text)
+        
+        self.save_text_btn = QPushButton("保存修改")
+        self.save_text_btn.clicked.connect(self.save_remote_text)
+        self.save_text_btn.setEnabled(False)
+        preview_layout.addWidget(self.save_text_btn)
         
         splitter.addWidget(preview_container)
         
@@ -146,8 +155,21 @@ class ExplorerPage(QWidget):
             full_path = os.path.join(self.current_remote_path, name).replace("\\", "/")
             content = AdbManager.read_remote_file(device_id, full_path)
             self.preview_text.setText(content)
+            
+            # Check if text is readable (heuristic for binary file)
+            if "无法读取文件内容" in content or "\ufffd" in content or "\x00" in content:
+                self.preview_text.setReadOnly(True)
+                self.save_text_btn.setEnabled(False)
+                self.preview_text.setStyleSheet("background-color: #eaeaea; font-family: 'Consolas', monospace;")
+            else:
+                self.preview_text.setReadOnly(False)
+                self.save_text_btn.setEnabled(True)
+                self.preview_text.setStyleSheet("background-color: #ffffff; font-family: 'Consolas', monospace;")
         else:
             self.preview_text.clear()
+            self.preview_text.setReadOnly(True)
+            self.save_text_btn.setEnabled(False)
+            self.preview_text.setStyleSheet("background-color: #fafafa; font-family: 'Consolas', monospace;")
             
     def copy_to_local(self):
         selected = self.file_list.selectedItems()
@@ -168,3 +190,52 @@ class ExplorerPage(QWidget):
                 QMessageBox.information(self, "成功", f"文件已成功复制到:\n{local_path}")
             else:
                 QMessageBox.critical(self, "失败", "复制失败，请检查设备连接或权限。")
+
+    def upload_to_remote(self):
+        device_id = self.parent_tab.get_current_device()
+        if not device_id or device_id == "未检测到设备": return
+        if not self.current_remote_path: return
+        
+        local_path, _ = QFileDialog.getOpenFileName(self, "选择要上传的文件")
+        if not local_path: return
+        
+        filename = os.path.basename(local_path)
+        remote_full_path = os.path.join(self.current_remote_path, filename).replace("\\", "/")
+        
+        success = AdbManager.push_file(device_id, local_path, remote_full_path)
+        if success:
+            QMessageBox.information(self, "成功", f"文件已成功上传到:\n{remote_full_path}")
+            self.load_remote_files()
+        else:
+            QMessageBox.critical(self, "失败", "上传失败，请检查设备连接或权限。")
+
+    def save_remote_text(self):
+        selected = self.file_list.selectedItems()
+        if not selected: return
+        name = selected[0].text()
+        if name.endswith("/") or name == "(空目录或无权限访问)": return
+        
+        device_id = self.parent_tab.get_current_device()
+        if not device_id or device_id == "未检测到设备": return
+        
+        remote_full_path = os.path.join(self.current_remote_path, name).replace("\\", "/")
+        content = self.preview_text.toPlainText()
+        
+        fd, temp_path = tempfile.mkstemp(suffix=".txt")
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                f.write(content)
+            
+            success = AdbManager.push_file(device_id, temp_path, remote_full_path)
+            if success:
+                QMessageBox.information(self, "成功", "文件修改已保存到设备。")
+            else:
+                QMessageBox.critical(self, "失败", "保存失败，请检查设备连接或权限。")
+        except Exception as e:
+            QMessageBox.critical(self, "错误", f"保存本地临时文件失败: {str(e)}")
+        finally:
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except Exception:
+                    pass

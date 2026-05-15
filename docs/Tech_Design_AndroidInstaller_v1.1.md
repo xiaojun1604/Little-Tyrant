@@ -29,12 +29,15 @@ ui/tabs/
 - **动态加载**: 为了性能，采用“点击展开”加载模式，仅在展开文件夹时拉取其下层内容。
 
 ### 3.3. 文件操作逻辑
-- **复制 (ADB Pull)**: 
+- **复制与导出 (ADB Pull)**: 
   - 使用 `QClipboard` 模拟粘贴板逻辑，或直接在选中时缓存路径。
   - 支持 `Ctrl+C` 快捷键捕获，触发 `adb pull {remote_path} {temp_or_target_local_path}`。
-- **文本预览**:
-  - 小型文件直接通过 `adb shell cat {remote_path}` 读取流并展示在 `QTextEdit` 中。
-  - 对于二进制或超大文件，增加安全截断或二进制检测逻辑，避免界面卡死。
+- **上传与替换 (ADB Push)**:
+  - 提供上传按钮或支持文件拖拽到目录视图。底层触发 `adb push {local_path} {remote_path}` 操作，实现文件上传或同名覆盖替换。
+- **文本预览与编辑**:
+  - 小型文件直接通过 `adb shell cat {remote_path}` 读取流并展示在可编辑的 `QTextEdit` 中。
+  - 增加“保存”按钮。用户修改并保存时，将 `QTextEdit` 的文本写入本地临时文件，再通过 `adb push {temp_local_path} {remote_path}` 推送到设备覆盖原文件，最后清理临时文件。
+  - 对于二进制或超大文件，增加安全截断或二进制检测逻辑，避免界面卡死，并禁用编辑功能。
 
 ## 4. 迁移与开发 SOP
 1. **基础重构**: 完成 `QStackedWidget` 侧边栏框架。
@@ -42,5 +45,5 @@ ui/tabs/
 3. **开发 Explorer**: 
    - 实现包名异步加载与搜索框逻辑。
    - 实现文件列表渲染。
-   - 实现 `adb shell cat` 预览与 `adb pull` 复制逻辑。
+   - 实现 `adb shell cat` 预览、`adb pull` 复制导出、文件 `adb push` 上传替换及文本编辑保存逻辑。
 4. **集成测试**: 验证文件传输的完整性及编码（UTF-8）显示正确性。

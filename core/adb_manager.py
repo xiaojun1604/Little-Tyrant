@@ -136,3 +136,21 @@ class AdbManager:
             return True
         except Exception:
             return False
+
+    @staticmethod
+    def push_file(device_id, local_path, remote_path):
+        """Copies a file from the local system to the device."""
+        try:
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+            subprocess.check_call(
+                ['adb', '-s', device_id, 'push', local_path, remote_path],
+                startupinfo=startupinfo
+            )
+            return True
+        except Exception as e:
+            print(f"Error pushing file: {e}")
+            return False

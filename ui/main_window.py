@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel
 from ui.tabs.android_tab import AndroidTab
+from ui.tabs.vpn_tab import VpnTab
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -19,6 +20,10 @@ class MainWindow(QMainWindow):
         # Android Tab
         self.android_tab = AndroidTab()
         self.tabs.addTab(self.android_tab, "Android 工具")
+        
+        # VPN Tab
+        self.vpn_tab = VpnTab()
+        self.tabs.addTab(self.vpn_tab, "VPN 管理")
         
         # Placeholder for iOS Tab
         self.ios_tab = QWidget()
