@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-13, macos-14]
+        os: [windows-latest, macos-13]
 
     steps:
     - name: Checkout code
@@ -40,10 +40,6 @@ jobs:
       run: |
         pyinstaller --noconsole --onefile --name "LittleTyrantInstaller_Mac_Intel" main.py
 
-    - name: Build with PyInstaller (macOS Apple Silicon)
-      if: matrix.os == 'macos-14'
-      run: |
-        pyinstaller --noconsole --onefile --name "LittleTyrantInstaller_Mac_Silicon" main.py
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
