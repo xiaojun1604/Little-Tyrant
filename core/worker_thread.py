@@ -53,3 +53,15 @@ class InstallWorker(QThread):
         except Exception as e:
             self.log_signal.emit(f"执行异常: {str(e)}")
             self.finished_signal.emit(False, str(e))
+
+class DeviceInfoWorker(QThread):
+    finished_signal = pyqtSignal(dict)
+    
+    def __init__(self, device_id):
+        super().__init__()
+        self.device_id = device_id
+        
+    def run(self):
+        from core.adb_manager import AdbManager
+        info = AdbManager.get_device_hardware_info(self.device_id)
+        self.finished_signal.emit(info)

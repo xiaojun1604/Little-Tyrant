@@ -154,3 +154,79 @@ class AdbManager:
         except Exception as e:
             print(f"Error pushing file: {e}")
             return False
+            
+    @staticmethod
+    def get_device_hardware_info(device_id):
+        """Retrieves hardware info (model, platform, gpu, opengl) from the device."""
+        info = {
+            "model": "Unknown",
+            "platform": "Unknown",
+            "gpu": "Unknown",
+            "opengl": "Unknown"
+        }
+        
+        if not device_id:
+            return info
+            
+        try:
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                
+            # Get model
+            try:
+                model_output = subprocess.check_output(
+                    ['adb', '-s', device_id, 'shell', 'getprop', 'ro.product.model'],
+                    startupinfo=startupinfo, encoding='utf-8', errors='ignore'
+                ).strip()
+                if model_output:
+                    info["model"] = model_output
+            except Exception:
+                pass
+                
+            # Get platform
+            try:
+                platform_output = subprocess.check_output(
+                    ['adb', '-s', device_id, 'shell', 'getprop', 'ro.board.platform'],
+                    startupinfo=startupinfo, encoding='utf-8', errors='ignore'
+                ).strip()
+                if not platform_output:
+                    platform_output = subprocess.check_output(
+                        ['adb', '-s', device_id, 'shell', 'getprop', 'ro.hardware'],
+                        startupinfo=startupinfo, encoding='utf-8', errors='ignore'
+                    ).strip()
+                if platform_output:
+                    info["platform"] = platform_output
+            except Exception:
+                pass
+                
+            # Get GPU and OpenGL via SurfaceFlinger
+            try:
+                sf_output = subprocess.check_output(
+                    ['adb', '-s', device_id, 'shell', 'dumpsys', 'SurfaceFlinger'],
+                    startupinfo=startupinfo, encoding='utf-8', errors='ignore'
+                )
+                for line in sf_output.split('\n'):
+                    if 'GLES:' in line:
+                        # GLES: ARM, Mali-G78, OpenGL ES 3.2 v1.r32p1...
+                        parts = [p.strip() for p in line.replace('GLES:', '').strip().split(',')]
+                        if len(parts) >= 3:
+                            info["gpu"] = f"{parts[0]}, {parts[1]}"
+                            
+                            # Clean up the opengl version string
+                            gl_full = parts[2]
+                            gl_clean = gl_full.split(' v')[0] if ' v' in gl_full else gl_full
+                            gl_clean = gl_clean.split('-')[0] if '-' in gl_clean else gl_clean
+                            info["opengl"] = gl_clean
+                        elif len(parts) >= 2:
+                            info["gpu"] = parts[0]
+                            info["opengl"] = parts[1]
+                        break
+            except Exception:
+                pass
+                
+        except Exception as e:
+            print(f"Error getting hardware info: {e}")
+            
+        return info
