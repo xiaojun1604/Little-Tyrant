@@ -28,19 +28,30 @@
 ### 2.4 `disconnect(vpn_name: str) -> bool`
 - **实现原理**：执行 `rasdial "{vpn_name}" /DISCONNECT`。检测返回码或输出确认断开成功。
 
-### 2.5 `open_windows_settings()`
+### 2.5 `get_split_tunneling(vpn_name: str) -> bool`
+- **实现原理**：通过 PowerShell 执行 `(Get-VpnConnection -Name "{vpn_name}").SplitTunneling`，获取当前的拆分隧道状态。
+- **注意**：返回 `False` 意味着开启了“全局模式”（不拆分），返回 `True` 意味着是路由模式。由于涉及到 PowerShell 调用，批量查询可能耗时，建议在 `Worker` 或后台线程中执行。
+
+### 2.6 `set_split_tunneling(vpn_name: str, enable_split: bool) -> bool`
+- **实现原理**：通过 PowerShell 执行 `Set-VpnConnection -Name "{vpn_name}" -SplitTunneling $True` 或 `$False` 来修改配置。
+
+### 2.7 `open_windows_settings()`
 - **实现原理**：调用 `os.startfile("ms-settings:network-vpn")`。
 
 ## 3. UI 表现层 (`ui/tabs/vpn_tab.py`)
 
 ### 3.1 视图结构
 - 继承自 `QWidget`，作为 `MainWindow` QTabWidget 的一个新标签。
-- 顶部是一个 `QHBoxLayout` 的工具栏，包含刷新和系统设置按钮。
+- 顶部是一个 `QHBoxLayout` 的工具栏，包含：
+  - “默认 VPN” 下拉框 (`QComboBox`)：在有多个 VPN 时可用。
+  - “全局连接/断开” 按钮 (`QPushButton`)：作为全局开关。
+  - “刷新列表” 和 “系统设置” 按钮。
 - 中部使用一个 `QScrollArea` 加 `QVBoxLayout`（或直接使用定制的 `QListWidget`）来渲染每条 VPN 记录。
+- **单条 VPN 记录布局**：包含 VPN 名称标签、状态指示灯、“全局模式” 复选框 (`QCheckBox`)、连接/断开按钮。
 
 ### 3.2 状态同步与定时器
 - **定时器轮询**：为了保证状态与系统同步，初始化一个 `QTimer`，每 3 秒触发一次静默的 `get_connected_vpn()` 检查。
-- 如果检测到当前连接的 VPN 发生改变（对比上次记录的值），则自动刷新 UI 上的状态指示灯和按钮的文字（连接/断开）。
+- 如果检测到当前连接的 VPN 发生改变（对比上次记录的值），则自动刷新 UI 上的状态指示灯、单条记录的按钮文字（连接/断开），以及顶部全局开关的状态和文本。
 
 ### 3.3 异步交互优化 (防界面假死)
 - `rasdial` 拨号在网络不佳时可能阻塞数秒钟。

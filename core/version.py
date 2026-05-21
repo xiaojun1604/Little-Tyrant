@@ -3,7 +3,7 @@ import os
 
 # Version Information
 # This should match the Git Tag
-VERSION = "1.2.4"
+VERSION = "1.3.0"
 APP_NAME = "Little-Tyrant"
 WINDOW_TITLE = "小霸王工具箱 (Little Tyrant Tool)"
 FILE_NAME = "Little-Tyrant-Tool"

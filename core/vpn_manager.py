@@ -89,3 +89,93 @@ class VpnManager:
             os.startfile("ms-settings:network-vpn")
         except Exception as e:
             print(f"Failed to open settings: {e}")
+
+    @staticmethod
+    def _get_pbk_paths():
+        appdata = os.environ.get('APPDATA')
+        programdata = os.environ.get('PROGRAMDATA')
+        
+        paths = []
+        if appdata:
+            paths.append(os.path.join(appdata, "Microsoft", "Network", "Connections", "Pbk", "rasphone.pbk"))
+        if programdata:
+            paths.append(os.path.join(programdata, "Microsoft", "Network", "Connections", "Pbk", "rasphone.pbk"))
+        return paths
+
+    @staticmethod
+    def get_all_vpn_split_tunneling() -> dict:
+        """Returns a dict mapping VPN names to their SplitTunneling status (True/False).
+        True = Split Tunneling enabled (Routing Mode, IpPrioritizeRemote=0)
+        False = Split Tunneling disabled (Global Mode, IpPrioritizeRemote=1)
+        """
+        result = {}
+        pattern_section = re.compile(r"^\[(.*)\]$")
+        pattern_ip = re.compile(r"^IpPrioritizeRemote=(\d)")
+        
+        for pbk_path in VpnManager._get_pbk_paths():
+            if os.path.exists(pbk_path):
+                try:
+                    with open(pbk_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        current_vpn = None
+                        for line in f:
+                            line = line.strip()
+                            match_sec = pattern_section.match(line)
+                            if match_sec:
+                                current_vpn = match_sec.group(1)
+                                continue
+                                
+                            if current_vpn:
+                                match_ip = pattern_ip.match(line)
+                                if match_ip:
+                                    val = match_ip.group(1)
+                                    # IpPrioritizeRemote=1 means Global Mode (SplitTunneling = False)
+                                    # IpPrioritizeRemote=0 means Routing Mode (SplitTunneling = True)
+                                    result[current_vpn] = (val == '0')
+                                    current_vpn = None # Wait for next section
+                except Exception as e:
+                    print(f"Error reading {pbk_path} for split tunneling: {e}")
+                    
+        return result
+
+    @staticmethod
+    def set_split_tunneling(vpn_name: str, enable_split: bool) -> tuple[bool, str]:
+        """Sets SplitTunneling for the specified VPN by modifying the .pbk file."""
+        target_val = '0' if enable_split else '1'
+        pattern_section = re.compile(r"^\[(.*)\]$")
+        
+        for pbk_path in VpnManager._get_pbk_paths():
+            if not os.path.exists(pbk_path):
+                continue
+                
+            try:
+                with open(pbk_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    lines = f.readlines()
+                    
+                found_vpn = False
+                modified = False
+                in_target_section = False
+                
+                for i, line in enumerate(lines):
+                    match_sec = pattern_section.match(line.strip())
+                    if match_sec:
+                        if match_sec.group(1) == vpn_name:
+                            in_target_section = True
+                            found_vpn = True
+                        else:
+                            in_target_section = False
+                        continue
+                        
+                    if in_target_section and line.strip().startswith("IpPrioritizeRemote="):
+                        lines[i] = f"IpPrioritizeRemote={target_val}\n"
+                        modified = True
+                        break # Found and modified, no need to continue parsing
+                        
+                if found_vpn and modified:
+                    with open(pbk_path, 'w', encoding='utf-8') as f:
+                        f.writelines(lines)
+                    return True, "设置成功"
+                    
+            except Exception as e:
+                return False, f"修改配置文件失败: {str(e)}"
+                
+        return False, "未找到对应的 VPN 配置文件"

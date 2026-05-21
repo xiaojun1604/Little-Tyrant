@@ -51,6 +51,7 @@
   ('core.adb_manager',
    'E:\\AI\\Little-Tyrant\\core\\adb_manager.py',
    'PYMODULE'),
+  ('core.version', 'E:\\AI\\Little-Tyrant\\core\\version.py', 'PYMODULE'),
   ('core.vpn_manager',
    'E:\\AI\\Little-Tyrant\\core\\vpn_manager.py',
    'PYMODULE'),
